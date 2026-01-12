@@ -1,17 +1,23 @@
 # slack-codex-bridge
 
-Lightweight Slack bot powered by Codex. It replies to mentions and offers a `/hangout` command for quick meetup suggestions.
+A lightweight bridge between Slack and Codex CLI. It receives Slack mentions or slash commands, forwards them to Codex, and formats the response back for Slack. The goal is a minimal, dependable bridge first — a bot is just one possible use.
 
 Project website: https://usuginus.github.io/slack-codex-bridge/
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/b3fea630-ec2a-4ad7-a196-9a3c343e7b69" alt="logo banner">
+  <img src="https://github.com/user-attachments/assets/2a361c6b-71c5-4587-851d-745ce08c98af" alt="logo banner">
 </p>
+
+## What this is
+
+- Slack → Codex CLI → Slack response pipeline
+- Simple prompt + formatting layer
+- Optional Slack context enrichment
 
 ## Features
 
 - Mention replies (concise, language-matched)
-- `/hangout` suggestions with 3 picks
+- Custom slash command flow (you define the prompt)
 - Slack-friendly formatting
 - Optional Slack context enrichment (channel history, members, user profile, thread)
 
@@ -42,19 +48,24 @@ Required:
 - `SLACK_SIGNING_SECRET`
 - `OPENAI_API_KEY`
 
-Optional:
+Optional (Codex CLI tuning):
 
 - `CODEX_WEB_SEARCH=0` disable web search
-- `CODEX_MODEL=gpt-4.1-mini`
+- `CODEX_MODEL=gpt-5.2`
 - `CODEX_REASONING_EFFORT=low`
+
+Optional (runtime):
+
+- `PLANNER_REPO_DIR=/path/to/repo`
 - `PLANNER_DEBUG=1` verbose failures
+- `PORT=8080`
 
 See `.env.sample` for examples.
 
 ## Slack App Setup
 
 - Enable Socket Mode
-- Slash Commands: `/hangout`
+- Slash Commands: define your own command (example: `/hangout`)
 - Event Subscriptions: `app_mention`
 - Bot Token Scopes:
   - `chat:write`
@@ -62,12 +73,12 @@ See `.env.sample` for examples.
   - `channels:history`
   - `users:read`
 
-## Project Structure
+## Architecture
 
 ```
 src/
   app/                 # Slack entrypoint
-  services/            # Business logic (hangout, mentions)
+  services/            # Prompting + formatting
   integrations/        # Slack API + Codex CLI + sanitizers
 ```
 
@@ -77,12 +88,16 @@ src/
 npm run dev
 ```
 
+## VM / Server Notes
+
+This project runs fine on a VM or a small server as long as Node.js, Codex CLI, and the required Slack tokens are available. If you use systemd, ensure the service PATH includes the `codex` binary and the `.env` file is readable by the service user.
+
 ## Troubleshooting
 
 - `codex` not found: ensure Codex CLI is installed and on PATH
-- timeouts: reduce prompt size or increase timeout
-- slash command fails: check Slack command name matches `/hangout`
+- timeouts: reduce prompt size or increase the timeout
+- slash command fails: verify the command name matches your Slack app config
 
 ## License
 
-MIT
+MIT License
